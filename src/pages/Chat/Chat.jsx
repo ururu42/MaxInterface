@@ -1,5 +1,5 @@
-import { Sidebar } from './Sidebar/Sidebar';
-import { Contacts } from './Contacts/Contacts';
+import { Sidebar } from '../Sidebar/Sidebar';
+import { Contacts } from '../Contacts/Contacts';
 
 export const Chat = () => {
 	return (
