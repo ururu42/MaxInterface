@@ -10,7 +10,7 @@ function App() {
 	return (
 		<div className="bg-gray-800 w-full min-h-screen">
 			{phone ? (
-				<Chat />
+				<Chat authData={credentials} phone={phone.phone} />
 			) : credentials ? (
 				<NumberPhonePage onSuccess={setPhone} />
 			) : (

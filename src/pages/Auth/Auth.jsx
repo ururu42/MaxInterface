@@ -19,22 +19,26 @@ export const Auth = ({ onSuccess }) => {
 		const cleanToken = token.trim();
 
 		try {
-			// Динамически берем первые 4 цифры инстанса для формирования хоста
-			const apiHost = `https://${cleanInstance.substring(0, 4)}.api.greenapi.com`;
+			// Используем стандартный хост Green API
+			const apiHost = 'https://api.green-api.com';
 			const url = `${apiHost}/waInstance${cleanInstance}/getStateInstance/${cleanToken}`;
 
-			const response = await fetch(url);
+			const response = await fetch(url, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
 
 			if (response.ok) {
-				// Если сервер ответил 200, значит ключи верные (даже если статус notAuthorized)
 				onSuccess?.({ instance: cleanInstance, token: cleanToken });
 			} else {
-				// Если код ответа не 200 (например, 401 или 403)
 				setError('Неверный Instance или token. Проверьте данные.');
 			}
 		} catch (err) {
-			// Ошибка сети или CORS
-			setError('Ошибка сети. Не удалось связаться с сервером.');
+			// Если это всё же CORS, то в консоли (F12 -> Console) вы увидите красную ошибку CORS
+			setError('Ошибка сети или CORS. Проверьте консоль браузера.');
+			console.error('Детали ошибки:', err);
 		} finally {
 			setLoading(false);
 		}
