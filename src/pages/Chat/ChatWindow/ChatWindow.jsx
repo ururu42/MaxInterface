@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-export const ChatWindow = ({ authData, chatId, onBack }) => {
+export const ChatWindow = ({ authData, chatId }) => {
 	const { instance, token } = authData ?? {};
 	const [messages, setMessages] = useState([]);
 	const [inputValue, setInputValue] = useState('');
@@ -61,6 +61,7 @@ export const ChatWindow = ({ authData, chatId, onBack }) => {
 					if (data && data.receiptId) {
 						const receiptId = data.receiptId;
 						const body = data.body;
+						console.log(body);
 
 						// Самая примитивная проверка: это входящее сообщение?
 						if (body?.typeWebhook === 'incomingMessageReceived') {
@@ -100,57 +101,74 @@ export const ChatWindow = ({ authData, chatId, onBack }) => {
 		return () => {
 			isAlive = false;
 		};
-	}, [instance, token, apiBaseUrl]); // Убрали chatId из зависимостей, чтобы цикл не перезапускался
+	}, [instance, token, apiBaseUrl]);
 
 	return (
 		<div className="flex h-screen w-full flex-col bg-gray-900 text-white">
 			{/* Шапка чата */}
 			<header className="flex h-16 items-center gap-4 bg-[#121316] px-6 border-b border-white/5">
-				<div>
+				<div className="max-w-4xl mx-auto w-full">
 					<h2 className="text-sm font-semibold">Чат с пользователем</h2>
 					<p className="text-xs text-zinc-500">{chatId.replace('@c.us', '')}</p>
 				</div>
 			</header>
 
-			{/* Лента сообщений */}
-			<div className="flex-1 overflow-y-auto bg-[#0b0c0e] p-6 space-y-3">
-				{messages.map((msg, index) => (
-					<div
-						key={index}
-						className={`flex w-full ${msg.direction === 'out' ? 'justify-end' : 'justify-start'}`}
-					>
+			<div className="relative flex-1 overflow-y-auto bg-black p-6">
+				{/* Фоновый слой для картинки */}
+				<div
+					className="absolute inset-0 pointer-events-none opacity-40 bg-repeat"
+					style={{
+						backgroundImage: `url('/img/structure.png')`,
+						backgroundSize: '400px',
+					}}
+				/>
+
+				{/* ОГРАНИЧИВАЮЩИЙ КОНТЕЙНЕР: собирает сообщения ближе к центру */}
+				<div className="relative z-10 max-w-4xl mx-auto w-full space-y-3">
+					{messages.map((msg, index) => (
 						<div
-							className={`max-w-[75%] rounded-xl px-4 py-2 text-sm ${
-								msg.direction === 'out' ? 'bg-blue-500' : 'bg-[#1c1d22]'
-							}`}
+							key={index}
+							className={`flex w-full ${msg.direction === 'out' ? 'justify-end' : 'justify-start'}`}
 						>
-							<p className="break-words">{msg.text}</p>
+							<div
+								className={`max-w-[75%] rounded-xl px-4 py-2 text-sm ${
+									msg.direction === 'out'
+										? 'bg-blue-600'
+										: 'bg-[#1c1d22]'
+								}`}
+							>
+								<p className="break-words">{msg.text}</p>
+							</div>
 						</div>
-					</div>
-				))}
-				<div ref={bottomRef} />
+					))}
+
+					{/* Элемент автоскролла теперь внутри центровщика */}
+					<div ref={bottomRef} />
+				</div>
 			</div>
 
 			{/* Форма ввода */}
-			<form
-				onSubmit={handleSend}
-				className="flex gap-2 bg-[#121316] p-4 border-t border-white/5"
-			>
-				<input
-					type="text"
-					value={inputValue}
-					onChange={(e) => setInputValue(e.target.value)}
-					placeholder="Написать сообщение…"
-					className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
-				/>
-				<button
-					type="submit"
-					disabled={!inputValue.trim()}
-					className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold hover:bg-blue-600 disabled:opacity-40"
+			<div className="bg-[#121316] p-4 border-t border-white/5">
+				<form
+					onSubmit={handleSend}
+					className="max-w-4xl mx-auto w-full flex gap-2"
 				>
-					Отправить
-				</button>
-			</form>
+					<input
+						type="text"
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						placeholder="Написать сообщение…"
+						className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+					/>
+					<button
+						type="submit"
+						disabled={!inputValue.trim()}
+						className="rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold hover:bg-blue-600 disabled:opacity-40"
+					>
+						Отправить
+					</button>
+				</form>
+			</div>
 		</div>
 	);
 };
